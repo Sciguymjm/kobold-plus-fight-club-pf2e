@@ -19,7 +19,7 @@ const CONST = {
     17: { daily: 25000, easy: 2000, medium: 3900, hard: 5900, deadly: 8800 },
     18: { daily: 27000, easy: 2100, medium: 4200, hard: 6300, deadly: 9500 },
     19: { daily: 30000, easy: 2400, medium: 4900, hard: 7300, deadly: 10900 },
-    20: { daily: 40000, easy: 2800, medium: 5700, hard: 8500, deadly: 12700 },
+    20: { daily: 40000, easy: 2800, medium: 5700, hard: 8500, deadly: 12700 }
   },
 
   CR: {
@@ -57,7 +57,7 @@ const CONST = {
       "27",
       "28",
       "29",
-      "30",
+      "30"
     ],
     0: { string: "0", numeric: 0, exp: 10 },
     "1/8": { string: "1/8", numeric: 0.125, exp: 25 },
@@ -92,7 +92,27 @@ const CONST = {
     27: { string: "27", numeric: 27, exp: 105000 },
     28: { string: "28", numeric: 28, exp: 120000 },
     29: { string: "29", numeric: 29, exp: 135000 },
-    30: { string: "30", numeric: 30, exp: 155000 },
+    30: { string: "30", numeric: 30, exp: 155000 }
+  },
+
+  THREAT: {
+    TRIVIAL: { base: 40, increment: 10 },
+    LOW: { base: 60, increment: 15 },
+    MODERATE: { base: 80, increment: 20 },
+    SEVERE: { base: 120, increment: 30 },
+    EXTREME: { base: 160, increment: 40 },
+    TPK: { base: 240, increment: 80 },
+    LIST: [
+      "TRIVIAL",
+      "LOW",
+      "MODERATE",
+      "SEVERE",
+      "EXTREME",
+      "TPK"
+    ],
+    calculate: (threat, players) => {
+      return threat.base + (threat.increment * (players - 4));
+    }
   },
 
   ALIGNMENTS: {
@@ -117,13 +137,13 @@ const CONST = {
     LAWFUL_EVIL: { string: "lawful evil" },
     NEUTRAL_EVIL: { string: "neutral evil" },
     CHAOTIC_EVIL: { string: "chaotic evil" },
-    UNALIGNED: { string: "unaligned" },
+    UNALIGNED: { string: "unaligned" }
   },
 
   LEGENDARY_MAP: {
     Legendary: "legendary",
     "Legendary (in lair)": "lair",
-    Ordinary: false,
+    Ordinary: false
   },
 
   ENCOUNTER_TYPES: {
@@ -139,12 +159,12 @@ const CONST = {
         [1, 2, 3],
         [2, 2],
         [2, 4],
-        [8],
-      ],
+        [8]
+      ]
     },
     boss: {
       name: "Boss",
-      samples: [{ groups: [{ count: 1, ratio: 1.0 }] }],
+      samples: [{ groups: [{ count: 1, ratio: 1.0 }] }]
     },
     boss_minions: {
       name: "Boss with minions",
@@ -152,17 +172,17 @@ const CONST = {
         {
           groups: [
             { count: 1, ratio: 0.7 },
-            { count: "players-players*2", ratio: 0.3 },
-          ],
+            { count: "players-players*2", ratio: 0.3 }
+          ]
         },
         {
           groups: [
             { count: 1, ratio: 0.7 },
             { count: "1-3", ratio: 0.2 },
-            { count: "players-players*2", ratio: 0.1 },
-          ],
-        },
-      ],
+            { count: "players-players*2", ratio: 0.1 }
+          ]
+        }
+      ]
     },
     duo: {
       name: "Duo monsters",
@@ -170,16 +190,16 @@ const CONST = {
         {
           groups: [
             { count: 1, ratio: 0.5 },
-            { count: 1, ratio: 0.5 },
-          ],
+            { count: 1, ratio: 0.5 }
+          ]
         },
         {
           groups: [
             { count: 1, ratio: 0.6 },
-            { count: 1, ratio: 0.4 },
-          ],
-        },
-      ],
+            { count: 1, ratio: 0.4 }
+          ]
+        }
+      ]
     },
     trio: {
       name: "Trio of monsters",
@@ -188,24 +208,24 @@ const CONST = {
           groups: [
             { count: 1, ratio: 0.33 },
             { count: 1, ratio: 0.33 },
-            { count: 1, ratio: 0.33 },
-          ],
+            { count: 1, ratio: 0.33 }
+          ]
         },
         {
           groups: [
             { count: 1, ratio: 0.4 },
             { count: 1, ratio: 0.3 },
-            { count: 1, ratio: 0.3 },
-          ],
+            { count: 1, ratio: 0.3 }
+          ]
         },
         {
           groups: [
             { count: 1, ratio: 0.5 },
             { count: 1, ratio: 0.3 },
-            { count: 1, ratio: 0.2 },
-          ],
-        },
-      ],
+            { count: 1, ratio: 0.2 }
+          ]
+        }
+      ]
     },
     horde: {
       name: "Horde",
@@ -214,21 +234,21 @@ const CONST = {
           groups: [
             { count: "2-4", ratio: 0.5 },
             { count: "players+3-players*3", ratio: 0.2 },
-            { count: "players+3-players*3", ratio: 0.3 },
-          ],
+            { count: "players+3-players*3", ratio: 0.3 }
+          ]
         },
         {
           groups: [
             { count: "1-players", ratio: 0.6 },
-            { count: "players+4-players*3", ratio: 0.4 },
-          ],
+            { count: "players+4-players*3", ratio: 0.4 }
+          ]
         },
         {
-          groups: [{ count: "players*3-players*5", ratio: 1 }],
-        },
-      ],
-    },
-  },
+          groups: [{ count: "players*3-players*5", ratio: 1 }]
+        }
+      ]
+    }
+  }
 };
 
 CONST.ALIGNMENT_TEST_ORDER = [
@@ -251,7 +271,7 @@ CONST.ALIGNMENT_TEST_ORDER = [
   CONST.ALIGNMENTS.NEUTRAL_EVIL,
   CONST.ALIGNMENTS.CHAOTIC_EVIL,
   CONST.ALIGNMENTS.NEUTRAL,
-  CONST.ALIGNMENTS.ANY,
+  CONST.ALIGNMENTS.ANY
 ];
 
 CONST.ALIGNMENTS.LAWFUL_GOOD.bits = 1;
@@ -344,7 +364,7 @@ CONST.ALIGNMENTS.NON_NEUTRAL.bits =
   CONST.ALIGNMENTS.LAWFUL_EVIL.bits |
   CONST.ALIGNMENTS.CHAOTIC_EVIL.bits;
 
-Object.keys(CONST.ALIGNMENTS).forEach(function (key) {
+Object.keys(CONST.ALIGNMENTS).forEach(function(key) {
   CONST.ALIGNMENTS[key].regex = new RegExp(
     CONST.ALIGNMENTS[key].string.replace(/[- ]/, "[- ]?"),
     "i"

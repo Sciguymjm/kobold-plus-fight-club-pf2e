@@ -1,4 +1,4 @@
-import { defineStore, acceptHMRUpdate } from "pinia";
+import { acceptHMRUpdate, defineStore } from "pinia";
 import { useParty } from "./party";
 import * as helpers from "../js/helpers";
 import { useNotifications } from "./notifications";
@@ -6,7 +6,6 @@ import CONST from "../js/constants";
 import { useMonsters } from "./monsters";
 import { useFilters } from "./filters";
 import { useLocalStorage } from "@vueuse/core/index";
-import hotkeys from "hotkeys-js";
 
 export const useEncounter = defineStore("encounter", {
   state: () => {
@@ -21,7 +20,7 @@ export const useEncounter = defineStore("encounter", {
         "the party's final session",
         "someone forgot to bring snacks",
         "rocks fall",
-        "someone insulted the DM",
+        "someone insulted the DM"
       ],
       loadedIndex: helpers.migrateLocalStorage(
         "encounterLoadedIndex",
@@ -48,7 +47,7 @@ export const useEncounter = defineStore("encounter", {
         "encounterSaved",
         "savedEncounters",
         []
-      ),
+      )
     };
   },
   actions: {
@@ -79,8 +78,7 @@ export const useEncounter = defineStore("encounter", {
       let fudgeFactor = 1.1; // The algorithm is conservative in spending exp; so this tries to get it closer to the actual medium value
       let baseExpBudget = totalExperienceTarget * fudgeFactor;
       let encounterTemplate = this.getEncounterTemplate();
-      let totalAvailableXP =
-        baseExpBudget / this.getMultiplier(encounterTemplate.total);
+      let totalAvailableXP = baseExpBudget;
 
       let targetExp;
       const newEncounter = [];
@@ -104,14 +102,14 @@ export const useEncounter = defineStore("encounter", {
             body: "Change the filters so that there are more monsters to sample from.",
             icon: "fa-circle-xmark",
             icon_color: "text-red-400",
-            sticky: true,
+            sticky: true
           });
           return false;
         }
 
         newEncounter.push({
           monster,
-          count: group.count,
+          count: group.count
         });
       }
 
@@ -122,25 +120,36 @@ export const useEncounter = defineStore("encounter", {
       this.saveToHistory(true);
     },
     getBestMonster(targetExp, encounter, numMonsters) {
+      console.log(`targetExp: ${targetExp} encounter: ${encounter} numMonsters: ${numMonsters}`);
+      const party = useParty();
       const monsters = useMonsters();
 
       let monsterCRIndex;
-      for (let i = 0; i < CONST.CR.LIST.length; i++) {
-        const lowerBound = CONST.CR[CONST.CR.LIST[i]];
-        const upperBound = CONST.CR[CONST.CR.LIST[i + 1]];
-        if (upperBound.exp > targetExp) {
+      // list is range from -1 to 30
+      for (let i = 31; i >= -1; i--) {
+        const lowerBound = i;
+        const upperBound = i + 1;
+        let upperExp = getExp(party, upperBound);
+        let lowerExp = getExp(party, lowerBound);
+        console.log(`${lowerBound} ${lowerExp} < ${targetExp} < ${upperBound} ${upperExp}`);
+        if (lowerExp < targetExp) {
           monsterCRIndex =
-            targetExp - lowerBound.exp < upperBound.exp - targetExp ? i : i + 1;
+            targetExp - lowerExp < upperExp - targetExp ? i : i + 1;
           break;
         }
       }
+      if (monsterCRIndex === undefined) {
+        monsterCRIndex = -1;
+      }
+      console.log(`monsterCRIndex: ${monsterCRIndex}`);
 
-      let monsterTargetCR = CONST.CR[CONST.CR.LIST[monsterCRIndex]];
-
+      let monsterTargetCR = {
+        numeric: monsterCRIndex
+      };
       let monsterList = monsters.filterBy(
         useFilters().overriddenCopy({
           minCr: monsterTargetCR.numeric,
-          maxCr: monsterTargetCR.numeric,
+          maxCr: monsterTargetCR.numeric
         }),
         (monster) => {
           return (
@@ -161,16 +170,16 @@ export const useEncounter = defineStore("encounter", {
           }
         } else {
           monsterCRNewIndex++;
-          if (monsterCRNewIndex === CONST.CR.LIST.length - 1) {
+          if (monsterCRNewIndex === threatLevelList.length - 1) {
             return false;
           }
         }
 
-        let monsterTargetCR = CONST.CR[CONST.CR.LIST[monsterCRNewIndex]];
+        let monsterTargetCR = CONST.THREAT[threatLevelList[monsterCRNewIndex]];
         monsterList = monsters.filterBy(
           useFilters().overriddenCopy({
             minCr: monsterTargetCR.numeric,
-            maxCr: monsterTargetCR.numeric,
+            maxCr: monsterTargetCR.numeric
           }),
           (monster) => {
             return !encounter.some((group) => group.monster === monster);
@@ -189,7 +198,7 @@ export const useEncounter = defineStore("encounter", {
           subtractive: true,
           groups: template.map((num) => {
             return { count: num };
-          }),
+          })
         };
       }
 
@@ -223,36 +232,11 @@ export const useEncounter = defineStore("encounter", {
 
       return template;
     },
-    getMultiplier(numMonsters) {
-      let multiplierCategory;
-      const multipliers = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5];
-      const party = useParty();
-
-      if (numMonsters <= 3) {
-        multiplierCategory = Math.max(1, numMonsters);
-      } else if (numMonsters < 7) {
-        multiplierCategory = 3;
-      } else if (numMonsters < 11) {
-        multiplierCategory = 4;
-      } else if (numMonsters < 15) {
-        multiplierCategory = 5;
-      } else {
-        multiplierCategory = 6;
-      }
-
-      if (party.totalPlayers < 3) {
-        multiplierCategory++;
-      } else if (party.totalPlayers > 5) {
-        multiplierCategory--;
-      }
-
-      return multipliers[multiplierCategory];
-    },
     getNewMonster(group) {
       const monsterList = useMonsters().filterBy(
         useFilters().overriddenCopy({
           maxCr: group.monster.cr.numeric,
-          minCr: group.monster.cr.numeric,
+          minCr: group.monster.cr.numeric
         }),
         (monster) => {
           return !this.groups.some((group) => group.monster === monster);
@@ -272,7 +256,7 @@ export const useEncounter = defineStore("encounter", {
       if (index === -1) {
         this.groups.push({
           monster,
-          count: 1,
+          count: 1
         });
       } else {
         group = this.groups[index];
@@ -301,9 +285,9 @@ export const useEncounter = defineStore("encounter", {
           return {
             monster: {
               name: group.monster.name,
-              slug: group.monster.slug,
+              slug: group.monster.slug
             },
-            count: group.count,
+            count: group.count
           };
         })
         .filter((group) => group.count > 0);
@@ -330,9 +314,9 @@ export const useEncounter = defineStore("encounter", {
         return {
           monster: {
             name: group.monster.name,
-            slug: group.monster.slug,
+            slug: group.monster.slug
           },
-          count: group.count,
+          count: group.count
         };
       });
       if (this.loaded) {
@@ -342,7 +326,7 @@ export const useEncounter = defineStore("encounter", {
         this.saved = [...this.saved, encounter];
       }
       useNotifications().notify({
-        title: "Encounter saved",
+        title: "Encounter saved"
       });
     },
 
@@ -356,7 +340,7 @@ export const useEncounter = defineStore("encounter", {
         title: "Encounter loaded",
         body: this.groups
           .map((group) => `${group.monster.name} x${group.count}`)
-          .join(", "),
+          .join(", ")
       });
     },
 
@@ -383,7 +367,7 @@ export const useEncounter = defineStore("encounter", {
         title: "Encounter loaded",
         body: this.groups
           .map((group) => `${group.monster.name} x${group.count}`)
-          .join(", "),
+          .join(", ")
       });
     },
 
@@ -400,7 +384,7 @@ export const useEncounter = defineStore("encounter", {
       this.groups = [];
       this.loadedLast = false;
       this.loadedIndex = null;
-    },
+    }
   },
   getters: {
     totalExp() {
@@ -413,8 +397,7 @@ export const useEncounter = defineStore("encounter", {
       return this.groups.reduce((acc, group) => acc + group.count, 0);
     },
     adjustedExp() {
-      const multiplier = this.getMultiplier(this.totalMonsters);
-      return Math.floor(this.totalExp * multiplier);
+      return this.totalExp;
     },
     actualDifficulty() {
       return this.getDifficultyFromExperience(this.adjustedExp);
@@ -424,13 +407,13 @@ export const useEncounter = defineStore("encounter", {
         return "";
       }
 
-      if (this.adjustedExp === 0) return "";
+      if (this.totalExp === 0) return "";
 
       const levels = Object.entries(useParty().experience);
       for (let i = 1; i < levels.length; i++) {
         const [lowerKey, lowerValue] = levels[i - 1];
         const [upperKey, upperValue] = levels[i];
-        const ratio = helpers.ratio(lowerValue, upperValue, this.adjustedExp);
+        const ratio = helpers.ratio(lowerValue, upperValue, this.totalExp);
 
         if (ratio >= 10) {
           return "... what.";
@@ -440,10 +423,10 @@ export const useEncounter = defineStore("encounter", {
           if (ratio >= 0.2) {
             return ratio >= 1.0
               ? "like " +
-                  helpers.randomArrayElement(this.insaneDifficultyStrings)
+              helpers.randomArrayElement(this.insaneDifficultyStrings)
               : ratio >= 0.6
-              ? "extremely deadly"
-              : "really deadly";
+                ? "extremely deadly"
+                : "really deadly";
           }
           return lowerKey;
         } else if (ratio >= 0.0 && ratio <= 1.0) {
@@ -487,12 +470,44 @@ export const useEncounter = defineStore("encounter", {
         easy: Math.floor(experience.easy / singleMultiplier),
         pair: Math.floor(mediumExp / (2 * pairMultiplier)),
         group: Math.floor(mediumExp / (4 * groupMultiplier)),
-        trivial: Math.floor(mediumExp / (8 * trivialMultiplier)),
+        trivial: Math.floor(mediumExp / (8 * trivialMultiplier))
       };
-    },
-  },
+    }
+  }
 });
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useEncounter, import.meta.hot));
+}
+
+export function getExp(party, level) {
+  let partyLevel = party.groups[0].level;
+  const diff = level - partyLevel;
+  switch (true) {
+    case diff < -4:
+      return 0;
+    case diff === -4:
+      return 10;
+    case diff === -3:
+      return 15;
+    case diff === -2:
+      return 20;
+    case diff === -1:
+      return 30;
+    case diff === 0:
+      return 40;
+    case diff === 1:
+      return 60;
+    case diff === 2:
+      return 80;
+    case diff === 3:
+      return 120;
+    case diff === 4:
+      return 160;
+    case diff === 5:
+      return 240;
+    case diff >= 6:
+      return 300;
+  }
+  return 0;
 }

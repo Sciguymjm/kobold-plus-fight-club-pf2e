@@ -1,6 +1,7 @@
 <script setup>
 import {useEncounter} from "../stores/encounter";
 import Monster from "../js/monster";
+import { useParty } from "../stores/party";
 
 const props = defineProps({
   monster: {
@@ -9,6 +10,7 @@ const props = defineProps({
 });
 
 const encounter = useEncounter();
+const party = useParty();
 </script>
 
 <template>
@@ -21,7 +23,7 @@ const encounter = useEncounter();
       <span
         class="primary-link cursor-pointer select-none"
         @click="encounter.addMonster(monster)"
-        :title="encounter.getDifficultyFromExperience(monster.cr.exp)"
+        :title="encounter.getDifficultyFromExperience(monster.getExp(party))"
         >Add</span
       >
     </td>
@@ -62,19 +64,19 @@ const encounter = useEncounter();
             class="pl-1"
             :class="{
               'text-indigo-300 dark:text-indigo-600':
-                encounter.getDifficultyFromExperience(monster.cr.exp) ===
+                encounter.getDifficultyFromExperience(monster.getExp(party)) ===
                 'Trivial',
               'text-green-300 dark:text-green-600':
-                encounter.getDifficultyFromExperience(monster.cr.exp) ===
+                encounter.getDifficultyFromExperience(monster.getExp(party)) ===
                 'Easy',
               'text-yellow-300 dark:text-yellow-600':
-                encounter.getDifficultyFromExperience(monster.cr.exp) ===
+                encounter.getDifficultyFromExperience(monster.getExp(party)) ===
                 'Medium',
               'text-amber-300 dark:text-orange-600':
-                encounter.getDifficultyFromExperience(monster.cr.exp) ===
+                encounter.getDifficultyFromExperience(monster.getExp(party)) ===
                 'Hard',
               'text-rose-300 dark:text-rose-600':
-                encounter.getDifficultyFromExperience(monster.cr.exp) ===
+                encounter.getDifficultyFromExperience(monster.getExp(party)) ===
                 'Deadly',
             }"
           ></span>
@@ -92,21 +94,21 @@ const encounter = useEncounter();
       <span
         :class="{
           'text-cyan-600 dark:text-cyan-400':
-            encounter.getDifficultyFromExperience(monster.cr.exp) === 'Trivial',
+            encounter.getDifficultyFromExperience(monster.getExp(party)) === 'Trivial',
           'text-green-600 dark:text-green-400':
-            encounter.getDifficultyFromExperience(monster.cr.exp) === 'Easy',
+            encounter.getDifficultyFromExperience(monster.getExp(party)) === 'Easy',
           'text-yellow-600 dark:text-yellow-400':
-            encounter.getDifficultyFromExperience(monster.cr.exp) === 'Medium',
+            encounter.getDifficultyFromExperience(monster.getExp(party)) === 'Medium',
           'text-amber-600 dark:text-orange-400':
-            encounter.getDifficultyFromExperience(monster.cr.exp) === 'Hard',
+            encounter.getDifficultyFromExperience(monster.getExp(party)) === 'Hard',
           'text-rose-600 dark:text-rose-500':
-            encounter.getDifficultyFromExperience(monster.cr.exp) === 'Deadly',
+            encounter.getDifficultyFromExperience(monster.getExp(party)) === 'Deadly',
         }"
       >
         <span v-text="monster.cr.string"></span>
         <span
           v-text="
-            ' (' + encounter.getDifficultyFromExperience(monster.cr.exp) + ')'
+            ' (' + encounter.getDifficultyFromExperience(monster.getExp(party)) + ')' + ' ' + monster.getExp(party) + ' XP'
           "
           class="text-xs"
         ></span>

@@ -27,27 +27,36 @@ export const useMonsters = defineStore("monsters", {
       let fetched = [];
 
       if (
+        true ||
         !this.builtIn.length ||
         versionCompare(this.version, this.storedVersion) !== 0
       ) {
         try {
-          await fetch("/json/se_monsters.json")
+          // await fetch("/json/se_monsters.json")
+          //   .then((res) => res.json())
+          //   .then((data) => {
+          //     fetched = fetched.concat(data);
+          //   });
+          console.log("Hello world")
+          var data = await fetch("/json/creatures-b1.json");
+          console.log(await data.json());
+          await fetch("/json/creatures-b1.json")
             .then((res) => res.json())
             .then((data) => {
-              fetched = fetched.concat(data);
+              fetched = fetched.concat(data["creature"]);
             });
-
-          await fetch("/json/se_third_party_monsters.json")
-            .then((res) => res.json())
-            .then((data) => {
-              fetched = fetched.concat(data);
-            });
-
-          await fetch("/json/se_community_monsters.json")
-            .then((res) => res.json())
-            .then((data) => {
-              fetched = fetched.concat(data);
-            });
+          //
+          // await fetch("/json/se_third_party_monsters.json")
+          //   .then((res) => res.json())
+          //   .then((data) => {
+          //     fetched = fetched.concat(data);
+          //   });
+          //
+          // await fetch("/json/se_community_monsters.json")
+          //   .then((res) => res.json())
+          //   .then((data) => {
+          //     fetched = fetched.concat(data);
+          //   });
         } catch (error) {
           alert(error);
 

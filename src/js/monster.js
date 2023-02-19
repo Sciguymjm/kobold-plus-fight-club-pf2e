@@ -1,17 +1,28 @@
 import CONST from "./constants.js";
 import * as helpers from "./helpers.js";
 import { useSources } from "../stores/sources";
+import { getExp } from "../stores/encounter";
+import { useParty } from "../stores/party";
 
+const sizeTraits = ["tiny", "small", "medium", "large", "huge", "gargantuan"];
 export default class Monster {
   constructor(attributes) {
     this.attributes = attributes;
-    this.cr = CONST.CR[attributes.cr];
+    this.cr = {
+      numeric: attributes.level,
+      string: attributes.level.toString(),
+      get exp() {
+        const party = useParty();
+        return getExp(party, this.numeric);
+      }
+    };
 
     this.name = attributes.name;
     this.type = attributes.type;
-    this.size = attributes.size;
+    // find first trait that matches a size
+    this.size = attributes.traits && this.getSize(attributes);
     this.hp = attributes.hp;
-    this.environment = attributes.environment.toLowerCase();
+    this.environment = "";
     this.isUnique = !!attributes["unique?"] || !!attributes["unique"];
     this.lair = !!attributes["lair"] || !!attributes["lair?"];
 
@@ -31,19 +42,19 @@ export default class Monster {
       : "";
 
     this.searchable = [
-      this.attributes.name,
+      this.name,
       this.attributes.section,
       this.attributes.type,
       this.attributes.size,
       this.attributes.alignment ? this.alignment.text : "",
-      this.attributes.cr.string,
+      this.cr.string,
     ]
       .concat(this.tags)
       .join("|")
       .toLowerCase();
 
     const sources = useSources();
-    this.sources = this.attributes.sources.split(", ").map((str) => {
+    this.sources = [attributes.source].map((str) => {
       let book = str;
       let location = "";
       let hasPageNumber = false;
@@ -60,21 +71,36 @@ export default class Monster {
         }
       }
 
-      let reference = sources.find(book);
+      let reference = {
+        shortname: str
+      };
 
       return {
-        actual_source: reference,
+        actual_source: {
+          enabled: true
+        },
         reference: {
           ...reference,
           ...(helpers.isValidHttpUrl(location) && { link: location }),
         },
-        fullText: reference.name + (hasPageNumber ? " p." + location : ""),
+        fullText: str + " page " + attributes.page
       };
     });
 
     this.sources.sort((a, b) =>
       a.fullText.localeCompare(b.fullText, "en", { sensitivity: "base" })
     );
+  }
+
+  getSize(attributes) {
+    return attributes.traits.find((trait) => {
+      return sizeTraits.includes(trait);
+    });
+  }
+
+  getExp(party) {
+    const level = this.cr.numeric;
+    return getExp(party, level);
   }
 
   get sourceEnabled() {

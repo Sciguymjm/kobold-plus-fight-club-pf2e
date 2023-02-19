@@ -151,39 +151,12 @@ const modals = useModals();
             class="mt-1 text-sm font-medium text-gray-900 dark:text-gray-300"
             v-text="
               encounter.totalExp > 0
-                ? helpers.formatNumber(encounter.totalExp) +
-                  ' (' +
-                  helpers.formatNumber(
-                    Math.round(encounter.totalExp / party.totalPlayersToGainXP)
-                  ) +
-                  '/player)'
-                : 'N/A'
-            "
-          ></dd>
-        </div>
-
-        <div class="flex items-center justify-between">
-          <dt class="mt-1 text-sm text-gray-600 dark:text-gray-200">
-            Adjusted XP
-          </dt>
-          <dd
-            class="mt-1 text-sm font-medium text-gray-900 dark:text-gray-300"
-            v-text="
-              encounter.adjustedExp > 0
-                ? helpers.formatNumber(encounter.adjustedExp) +
-                  ' (' +
-                  helpers.formatNumber(
-                    Math.round(
-                      encounter.adjustedExp / party.totalPlayersToGainXP
-                    )
-                  ) +
-                  '/player)'
+                ? helpers.formatNumber(encounter.totalExp)
                 : 'N/A'
             "
           ></dd>
         </div>
       </dl>
-
       <div class="mt-4 flex space-x-2">
         <ImprovedInitiativeButton>
           Send to Improved Initiative

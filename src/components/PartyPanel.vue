@@ -141,7 +141,7 @@ const modals = useModals();
           XP Goals
         </div>
         <div
-          v-for="difficulty in ['Easy', 'Medium', 'Hard', 'Deadly']"
+          v-for="difficulty in ['Trivial', 'Easy', 'Medium', 'Hard', 'Deadly']"
           :key="difficulty"
           class="contents"
           :class="{
